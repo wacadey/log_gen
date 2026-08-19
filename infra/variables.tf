@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "project_name" {
   description = "리소스 이름에 사용할 프로젝트명"
   type        = string
-  default     = "de-ai-25-loggen"
+  default     = "de-ai-12-loggen"
 }
 
 variable "vpc_cidr" {
