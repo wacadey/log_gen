@@ -53,7 +53,7 @@ if errorlevel 1 goto :fail
 
 echo.
 echo [4/4] Build and push Python/Faker generator image
-docker build -t "%REPO%:latest" "%GENERATOR%"
+docker build --no-cache --platform linux/amd64 -t "%REPO%:latest" "%GENERATOR%"
 if errorlevel 1 goto :fail
 
 docker push "%REPO%:latest"
