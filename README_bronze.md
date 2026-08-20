@@ -1,4 +1,4 @@
-# 개요
+ # 개요
 - main 브런치는 로그를 CloudWatch에 저장하고 있음
   - 애플리케이션 상태/오류/디버깅 용도 => 개발, 유지보수에 연관 => 앱/웹 개발자 관여
 - 데이터 엔지니어 관점 새로운 흐름(파이프라인 구성) 필요
@@ -81,21 +81,22 @@ Fargate → Kinesis → Firehose → S3 확인 (jsonl, gzip)
 # 수정은 표기 않함
 ├─infra
 │  │  ecr.tf            # 유지
-│  │  ecs.tf            # 유지
-│  │  iam.tf            
-│  │  locals.tf
-│  │  logs.tf
-│  │  outputs.tf
-│  │  provider.tf
-│  │  sg.tf
-│  │  variables.tf
-│  │  version.tf         # 유지
-│  │  vpc.tf             # 유지
+│  │  ecs.tf            # 9. 수정
+│  │  iam.tf            # 6/8. 수정 (6.firehose 관련, 8.ecs-task에서 kinesis put 처리) 
+│  │  locals.tf         # 3. 수정
+│  │  logs.tf           # 유지
+│  │  outputs.tf        # 10. 수정
+│  │  provider.tf       # 1. 수정
+│  │  sg.tf             # 유지
+│  │  variables.tf      # 2. 수정 
+│  │  version.tf        # 유지
+│  │  vpc.tf            # 유지
 │  │  
-│  ├─ kinesis.tf         # 신규
-│  ├─ firehose.tf        # 신규
-│  ├─ s3.tf              # 신규
+│  ├─ kinesis.tf        # 4. 신규
+│  ├─ firehose.tf       # 7. 신규
+│  ├─ s3.tf             # 5. 신규
 ```
+
 
 # 파이썬 검토
 
