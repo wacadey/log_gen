@@ -1,4 +1,4 @@
- # 개요
+# 개요
 - main 브런치는 로그를 CloudWatch에 저장하고 있음
   - 애플리케이션 상태/오류/디버깅 용도 => 개발, 유지보수에 연관 => 앱/웹 개발자 관여
 - 데이터 엔지니어 관점 새로운 흐름(파이프라인 구성) 필요
@@ -136,4 +136,48 @@ ecommerce       도메인
 1               Fargate Task 1개
 ap-northeast-2  서울 리전
 1               Time Scale 1배
+```
+- 명령
+- 25건 로그 생성
+- Cloudwatch 로그 기록됨 (stdout 설정이 기본)
+- kinesis -> firehose -> s3 기록됨 (ecs 설정에 환경변수로 세팅되어 있음)
+- s3에서 로그 발생후 언제 확인 가능한가? -> 약간의 텀 존재함, 1분 이후 혹은 1Mib(firehose 버퍼링 조건) 초과 이후 확인 가능함
+```
+# 윈도우
+scripts/run-generator.bat ecommerce 5 5 0.05 1 ap-northeast-2 1
+# 맥
+sh /scripts/run-generator.bat ecommerce 5 5 0.05 1 ap-northeast-2 1
+
+----
+============================================================
+Fargate synthetic log generator
+============================================================
+Run ID          : loggen-1678413507-9513
+Domain          : ecommerce
+Duration        : 5s
+Base RPS        : 5
+Time scale      : 1
+Corruption rate : 0.05
+Tasks           : 1
+Region          : ap-northeast-2
+Cluster         : de-ai-25-loggen-cluster
+
+-----------------------------------------------------------------------------------------------------------                
+|                                                 RunTask                                                 |
++---------------------------------------------------------------------------------------------------------+
+|  arn:aws:ecs:ap-northeast-2:827913617635:task/de-ai-25-loggen-cluster/52f82a3a6648480d84627f811196ded4  |
++---------------------------------------------------------------------------------------------------------+
+
+
+Task started.
+Follow generated logs:
+  aws logs tail "/ecs/de-ai-25-loggen" --follow --region "ap-northeast-2"
+```
+
+- 실시간 로그 확인
+```
+aws logs tail "/ecs/de-ai-25-loggen" --follow --region "ap-northeast-2"
+---
+{"schema_version":"1.0","record_type":"application_log","event_id":"bdc9f274-7149-422e-b989-8dbbd145c2c8","trace_id":"2e5d3b9bf87e44208908c8bc6cb9620d","run_id":"loggen-1678413507-9513","occurred_at":"2026-08-20T14:51:40.714+09:00","generated_at_utc":"2026-08-20T05:51:40.714+00:00","domain":"ecommerce","event_type":"add_to_cart","service":{"name":"commerce-api","environment":"simulation","instance_id":"sim-07"}
+...
 ```
