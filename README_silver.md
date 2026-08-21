@@ -108,10 +108,12 @@ flink/
 # 윈도우
 winget search Microsoft.OpenJDK 
 winget install Microsoft.OpenJDK.11
-java -version
+  java -version
+
 choco install maven or scoop install main/maven or 직접설치
 https://maven.apache.org/download.cgi?utm_source=chatgpt.com 접속 > apache-maven-3.9.16-bin.zip 다운
 bin 폴더를 path 설정
+  mvn -version
 
 # 맥
 brew install openjdk@11 maven
