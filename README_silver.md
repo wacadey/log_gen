@@ -128,3 +128,31 @@ mvn -version
 ./scripts/build-flink.bat
 sh ./scripts/build-flink.sh
 ```
+
+# 세팅 
+```
+# 인프라 구성
+terraform -chdir=infra fmt
+terraform -chdir=infra validate
+terraform -chdir=infra plan
+
+./scripts/setup.bat
+
+# Flink 서비스 진입 -> 어플리케이션의 상태 체크 -> 실행 상태가 확인되면 (그린라이트)
+
+# 로그 발송 -> 1분 전후로 s3/버킷/silver 생성 여부 확인 -> 하위에 로그가 존재함 => 완료!!
+
+```
+
+# 트레블 슈팅
+```
+# 등록된 리소스 확인
+terraform state list
+
+# AlreadyExists => 예전게 남아 있는 경우 
+# 리소스 등록분에서 누락된 부분이 잇으면 수동 연결
+# terraform import 리소스명 리소스값
+terraform import aws_ecr_repository.generator de-ai-25-loggen-repo
+
+
+```
