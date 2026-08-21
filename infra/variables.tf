@@ -145,13 +145,13 @@ variable "flink_source_init_poisition" {
   description = "flink가 데이터 처리시 입력원쪽의 어디서부터 처리할 것인가 설정"
   type        = string
   default     = "LATEST"
-  
+
   # 변수의 값으로 올수 있는 내용들을 제약
   validation {
     # 오직 2가지만 허가됨
     condition = contains([
       "LATEST",
-      "TRIM_HORIZON"  
+      "TRIM_HORIZON"
     ], var.flink_source_init_poisition)
     error_message = "flink_source_init_poisition is only LATEST or TRIM_HORIZON"
   }

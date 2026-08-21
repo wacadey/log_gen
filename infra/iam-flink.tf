@@ -23,7 +23,7 @@ resource "aws_iam_role" "flink" {
 #    Cloudwatch에 로그 기록
 data "aws_iam_policy_document" "flink" {
   statement {
-    sid    = "ReadBronzeKinesis"         # statement 구분용
+    sid    = "ReadBronzeKinesis" # statement 구분용
     effect = "Allow"
     actions = [
       "kinesis:DescribeStream",
@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "flink" {
       "s3:GetObjectVersion"
     ]
     resources = [
-       # 본인 버킷/flink/*
+      # 본인 버킷/flink/*
       "${aws_s3_bucket.data.arn}/flink/*"
     ]
   }
@@ -72,7 +72,7 @@ data "aws_iam_policy_document" "flink" {
     resources = [
       "*"
     ]
-  } 
+  }
   # 로그 쓰기 
   statement {
     sid    = "WriteFlinkLog"
@@ -83,11 +83,11 @@ data "aws_iam_policy_document" "flink" {
     resources = [
       "${aws_cloudwatch_log_group.flink.arn}"
     ]
-  } 
+  }
 }
 
 # 위에서 만든 기본 role에 아래에서 조회한 정책 부여
-resource "aws_iam_role_policy" "firehose" {
+resource "aws_iam_role_policy" "flink" {
   name   = "${var.project_name}-flink-policy"
   role   = aws_iam_role.flink.id
   policy = data.aws_iam_policy_document.flink.json
@@ -107,7 +107,7 @@ data "aws_iam_policy_document" "firehose_silver_assume" {
   }
 }
 resource "aws_iam_role" "firehose_silver" {
-  name = "${var.project_name}-firehose-silver-role"
+  name               = "${var.project_name}-firehose-silver-role"
   assume_role_policy = data.aws_iam_policy_document.firehose_silver_assume.json
 }
 data "aws_iam_policy_document" "firehose_silver" {
