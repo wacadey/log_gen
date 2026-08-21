@@ -11,12 +11,15 @@ locals {
 
 # flink_app이란 flink-silver.zip이고, aws s3에 위치해야 함
 resource "aws_s3_object" "flink_app" {
+  # 버킷 지정
   bucket = aws_s3_bucket.data.id
+  # flink 앱 지정 => 키
   key    = "flink/applications/flink-silver-${local.flink_artifact_hash}.zip"
-
+  # 로커 -> s3 업로드한 zip 경로
   source      = local.flink_artifact_path
+  # zip에 대한 해시검사, 소스 변경되면 감지됨
   source_hash = local.flink_artifact_hash
-
+  # 의존성, 사전에 aws_s3_bucket_public_access_block 완료된 후 진행
   depends_on = [
     aws_s3_bucket_public_access_block.data
   ]

@@ -116,7 +116,7 @@ del /q "%OVERRIDE_FILE%" >nul 2>&1
 if not "%RUN_RC%"=="0" exit /b %RUN_RC%
 
 call :tf_output_raw cloudwatch_log_group LOG_GROUP
-if errorlevel 1 set "LOG_GROUP=/ecs/de-ai-25-loggen"
+if errorlevel 1 set "LOG_GROUP=/ecs/de-ai-12-loggen"
 
 echo.
 echo Task started.
