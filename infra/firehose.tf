@@ -1,4 +1,4 @@
-# kinesis -> firehose -> s3
+# 브론즈레이어 : kinesis -> firehose -> s3 (데이터 파이프 라인)
 resource "aws_kinesis_firehose_delivery_stream" "logs" {
   # 이름
   name        = local.firehose_name
@@ -37,7 +37,8 @@ resource "aws_kinesis_firehose_delivery_stream" "logs" {
     # S3 버킷 오류 출력 접두사
     # 현재는 에러를 단독 구성, 브론즈/실버/골드등 계층 구분 하지 x => 필요시 구성 가능
     # 경로상에 에러애 대한 타입 지정 -> 유형별로 에러가 모이게 작성
-    error_output_prefix = "error/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
+    # [실버 수정]
+    error_output_prefix = "errors/bronze/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
   }
 
   # 의존성
