@@ -186,6 +186,7 @@ terraform import aws_ecr_repository.generator de-ai-25-loggen-repo
   - 실버 레벨 추가 부분
     - flink 앱 코드 확인
       - 추후 필요시 코드 업그레이드(기능 추가 부여)
+
     - 오염된 데이터 삭제(현재) => 별도 보관(저장) => 추후 해당 원인 분석 할수 있게 보관 (확장)
     - 저장데이터 -> jsonl (gzip) => parquet 저장(glue 사용)
     - flink 역활 lambda 대체 (차이점 이해)
@@ -203,3 +204,37 @@ terraform import aws_ecr_repository.generator de-ai-25-loggen-repo
 - 카프카 (뒤에서 체크)
 - ELK, EFK
 - step function, eventbridge 
+
+# flink 앱 코드 확인
+- 80% 코드 유지
+  - 필요한 기능만 추가하는 구조로 활용
+  - 함수에서 핵심 부분(정제, 전처리)만 커스텀 하면 기능 활용
+  - 리소스가 변경되면 보정(설정값)
+
+# 오염된 데이터 삭제(현재) => 별도 보관(저장)
+## 개요
+- 추후 해당 원인 분석 할수 있게 보관 (확장)
+- 구성
+```
+Bronze Kinesis -> 배치 프로세싱으로 통해 오염 데이터만 추출하여 주기적으로 모니터링 방법
+      ↓
+    Flink
+      │
+      ├─ 정상 → Silver Kinesis → Firehose → S3 silver/
+      │
+      └─ 비정상 → Rejected Kinesis
+                       ↓
+                    Firehose
+                       ↓
+                  S3 rejected/ => 차후 배치 프로세싱을 통해 => 근본적인 문제 해결
+```
+- 정상과 비정상은 flink에서 연결
+  - None으로 처리되는 부분을 Rejected Kinesis로 전달하도록 sql 수정
+- Rejected Kinesis -> Firehose -> S3 rejected/ : 인프라 구성
+
+## 인프라 구성
+- 인프라 구성 -> 적용
+  - 대상 : kinesis 신규, kinesis->firehose, iam, flink, locals, variables?, outputs
+    - locals
+    
+- flink 수정 -> 테스트 -> 오염데이터를 비율 30% 상승 -> 로그 발생 -> 오염데이터 저장 확
