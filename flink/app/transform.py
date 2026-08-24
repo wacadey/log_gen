@@ -10,6 +10,7 @@ SILVER_SCHEMA_VERSION = "1.0"
 # [REJECT] reject 데이터 관리 버전 
 REJECT_SCHEMA_VERSION = "1.0"
 
+# [REJECT]
 # 데이터 사전 체크 -> 오류 사유를 추가 반환
 def _parse_payload(payload: Any):
     # 1. 데이터에 문제가 있으면 => None 처리
@@ -41,8 +42,13 @@ def _parse_payload(payload: Any):
     # 4. 정상 파싱
     return event, None
 
+# 실버 kinesis로 전송되는 루틴이므로, 오염 데이터는 누락
 def clean_event_payload(payload: Any) -> Optional[str]:
-    
+    # 데이터 검수
+    event, reject_reason = _parse_payload( payload )
+    # 오염데이터인 경우
+    if reject_reason is not None:
+        return None # 데이터 누락
     
     # 클린작업
     # 딕셔너리 컴프리핸션
@@ -60,6 +66,48 @@ def clean_event_payload(payload: Any) -> Optional[str]:
     # 실버에 저장하기 위해 json 덤프 dict => 문자열 (객체 직렬화)
     return json.dumps(
         cleaned,                    # 최종 정제/전처리된 데이터
+        ensure_ascii=False,         # 한글. 빈 ascii 문자 => 원문그대로
+        separators=(",", ":"),      # 간결하게 표현 => 저용량 처리
+        default=str,                # 객체 직렬화가 않되는 값은 강제로 문자열 처리
+    )
+
+# [REJECT]
+# rejecect kinesis로 전송되는 루틴이므로, 정상 데이터는 누락
+def reject_event_payload(payload: Any) -> Optional[str]:
+    # 데이터 검수
+    _, reject_reason = _parse_payload( payload )
+    # 오염데이터인 경우
+    if reject_reason is None:
+        return None # 데이터 누락 (왜, 정상데이터 누락)
+    
+    # 오염 데이터 원형 보존
+    if isinstance(payload, bytes):
+        try:
+            oir_payload = payload.decode("utf-8")
+        except UnicodeDecodeError:
+            # 객체의 공식적인 문자열 처리 내용 -> 내용보존
+            oir_payload = repr(payload)
+    else:
+        oir_payload = payload  
+    
+    # 저장 데이터 최종 구성
+    rejected = {
+        # 오류의 내용을 기술
+        "_reject" : {
+            "layer": "rejected",
+            "processor": "apache-flink",
+            "schema_version": REJECT_SCHEMA_VERSION,
+            # 오염 데이터의 이유
+            "reason": reject_reason
+            "processed_at": datetime.now(timezone.utc).isoformat(), # 처리시간
+        },
+        # 오류가 난 상태 그대로 보관
+        "original_payload":oir_payload
+    }
+
+    # 실버에 저장하기 위해 json 덤프 dict => 문자열 (객체 직렬화)
+    return json.dumps(
+        rejected,                   # 최종 오염된 데이터
         ensure_ascii=False,         # 한글. 빈 ascii 문자 => 원문그대로
         separators=(",", ":"),      # 간결하게 표현 => 저용량 처리
         default=str,                # 객체 직렬화가 않되는 값은 강제로 문자열 처리
