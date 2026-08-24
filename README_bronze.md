@@ -176,7 +176,7 @@ Follow generated logs:
 
 - 실시간 로그 확인
 ```
-aws logs tail "/ecs/de-ai-25-loggen" --follow --region "ap-northeast-2"
+aws logs tail "/ecs/de-ai-12-loggen" --follow --region "ap-northeast-2"
 ---
 {"schema_version":"1.0","record_type":"application_log","event_id":"bdc9f274-7149-422e-b989-8dbbd145c2c8","trace_id":"2e5d3b9bf87e44208908c8bc6cb9620d","run_id":"loggen-1678413507-9513","occurred_at":"2026-08-20T14:51:40.714+09:00","generated_at_utc":"2026-08-20T05:51:40.714+00:00","domain":"ecommerce","event_type":"add_to_cart","service":{"name":"commerce-api","environment":"simulation","instance_id":"sim-07"}
 ...

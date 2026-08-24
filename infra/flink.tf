@@ -27,6 +27,7 @@ resource "aws_s3_object" "flink_app" {
 
 # flink 자체 내용
 resource "aws_kinesisanalyticsv2_application" "silver" {
+  provider = aws.flink_no_tags
   # flink 리소스 이름
   name = local.flink_application_name
   # 설명
@@ -125,8 +126,8 @@ resource "aws_kinesisanalyticsv2_application" "silver" {
     aws_s3_object.flink_app
   ]
 
-  tags = {
-    DataLayer = "silver"
-    Processor = "flink"
-  }
+  #tags = {
+  #  DataLayer = "silver"
+  #  Processor = "flink"
+  #}
 }
