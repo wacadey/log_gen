@@ -313,6 +313,9 @@ Bronze Kinesis -> 배치 프로세싱으로 통해 오염 데이터만 추출하
   - fink 앱 가동(대시보드 or flink-start.bat)
   - flink-status.bat => RUNNING
   - 로그 발송
+    ```
+    scripts\run-generator.bat ecommerce 300 10 0.30 1 ap-northeast-2 1
+    ```
   - 1분후 > s3://버킷/silver/..../*.parquet 확인 => 다운로드 => 구글 parquet 뷰어 => 드레그드롭
   - Glue가서 데이데이스, 테이블등 각각 조회 > 스키마 확인
   - fink 앱 중지(대시보드 or flink-stop.bat)
