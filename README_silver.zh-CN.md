@@ -324,4 +324,18 @@ Bronze Kinesis -> 通过批处理只提取污染数据并定期监控的方法
 - `outputs.tf`
   - 输出 Glue 相关名称和资源等信息
 
-### silver.tf（修改）
+- 应用基础设施
+  - `terraform -chdir=infra plan`
+  - `terraform -chdir=infra apply`
+  - 启动 Flink 应用（通过 Dashboard 或 `flink-start.bat`）
+  - 执行 `flink-status.bat`，确认状态为 `RUNNING`
+  - 发送日志
+
+    ```text
+    scripts\run-generator.bat ecommerce 300 10 0.30 1 ap-northeast-2 1
+    ```
+
+  - 约 1 分钟后，检查 `s3://存储桶/silver/..../*.parquet`，下载文件并将其拖放到在线 Parquet Viewer 中查看
+  - 进入 Glue，分别查看 Database、Table 等资源，并确认 Schema
+  - 停止 Flink 应用（通过 Dashboard 或 `flink-stop.bat`）
+  - 执行 `flink-status.bat`，确认状态恢复为 `READY`
