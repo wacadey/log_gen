@@ -238,6 +238,45 @@ Bronze Kinesis -> 배치 프로세싱으로 통해 오염 데이터만 추출하
     - 대상 : kinesis 신규, kinesis->firehose, iam, flink, locals, variables, outputs    
   - flink 수정 -> 테스트 -> 오염데이터를 비율 30% 상승 -> 로그 발생 -> 오염데이터 저장 확인
 - 실행 절차
-  - flink 앱 빌드
-  - 인프라 업데이트 및 앱 배포
+  - flink 앱 빌드 + 인프라 업데이트 및 앱 배포
+    ```
+      scripts\setup-flink.bat
+      
+      sh ./scripts/setup-flink.sh
+
+      ----
+      scripts\flink-status.bat
+      ----------------------------------------------------------
+      |                   DescribeApplication                  |
+      +-------------------------------+--------------+---------+
+      |             Name              |   Runtime    | Status  |
+      +-------------------------------+--------------+---------+
+      |  de-ai-25-loggen-silver-flink |  FLINK-1_20  |  READY  |
+      +-------------------------------+--------------+---------+
+
+      -----
+      scripts\flink-start.bat
+
+      scripts\flink-status.bat
+      # READY -> STARTING -> RUNNING
+
+      ----- 
+      # RUNNING 상태가 확인되면 -> 로그 발생, 오염도 30% 확대
+      scripts\run-generator.bat ecommerce 30 10 0.30 1 ap-northeast-2 1
+
+      -----
+      # s3에서 reject 폴더 하위 데이터 확인
+
+      -----
+      # flink 중단
+      scripts\flink-stop.bat
+      -----
+      # 중단 후 확인
+      scripts\flink-status.bat
+      ----------------------------------------------------------                                               
+      |                   DescribeApplication                  |
+      +-------------------------------+--------------+---------+
+      |             Name              |   Runtime    | Status  |
+      +-------------------------------+--------------+---------+
+    ```
   - 로그 제너레이터 가동 -> 오염도를 30% 올려서 잘 수집되도록 구성

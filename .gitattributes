@@ -1,0 +1,6 @@
+# Windows command scripts must use CRLF when checked out.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# POSIX shell scripts must use LF when checked out.
+*.sh text eol=lf
