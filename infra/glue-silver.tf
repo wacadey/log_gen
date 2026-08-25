@@ -7,10 +7,10 @@
 
 # 1. 데이터베이스 구성
 resource "aws_glue_catalog_database" "silver" {
-    # SQL문 고려하여 _로 표기
-    # 디비명
-    name = "${lower(replace(var.project_name, "-","_"))}_silver_glue_db"
-    #name = "${var.project_name}-silver-glue-db"
+  # SQL문 고려하여 _로 표기
+  # 디비명
+  name = "${lower(replace(var.project_name, "-", "_"))}_silver_glue_db"
+  #name = "${var.project_name}-silver-glue-db"
 }
 
 # 2. 테이블 구성, 데이터베이스 내부에 테이블을 수십개 정의 가능
@@ -34,23 +34,23 @@ resource "aws_glue_catalog_table" "silver" {
     "projection.enabled" = "true"
     # 파티션 정보 -> year, month, day, hour -> 타입, 값 범위 지정
     # year
-    "projection.year.type" = "integer"
+    "projection.year.type"  = "integer"
     "projection.year.range" = "2026,2040" # 뒤에 2040는 설정값, 2026은 현재로 가정
-    
+
     # month
     # 1 -> 01, 2 -> 02 => digits = 2
-    "projection.month.type" = "integer"
-    "projection.month.range" = "1,12"
+    "projection.month.type"   = "integer"
+    "projection.month.range"  = "1,12"
     "projection.month.digits" = "2" # 2자리수로 맞춤
 
     # day
-    "projection.day.type" = "integer"
-    "projection.day.range" = "1,31"
+    "projection.day.type"   = "integer"
+    "projection.day.range"  = "1,31"
     "projection.day.digits" = "2" # 2자리수로 맞춤
 
     # hour
-    "projection.hour.type" = "integer"
-    "projection.hour.range" = "0,23"
+    "projection.hour.type"   = "integer"
+    "projection.hour.range"  = "0,23"
     "projection.hour.digits" = "2" # 2자리수로 맞춤
 
     # 파티션 S3 경로 규칙
@@ -130,10 +130,10 @@ resource "aws_glue_catalog_table" "silver" {
     # client 중첩 스키마
     # "client":{"ip":"200.202.139.62","user_agent":"WhitelabelApp/4.8.1 Android","device_id":"367d6a0dffb04145"}
     columns {
-      name = "client"     
+      name = "client"
       type = "struct<ip:string,user_agent:string,device_id:string>"
     }
-    
+
     # request 중첩 스키마
     # "request":{"method":"GET","path":"/api/products/prd_83053","request_bytes":746}0f250bc2e713
     columns {
@@ -164,19 +164,19 @@ resource "aws_glue_catalog_table" "silver" {
 
   }
 
-  Partition_keys {
+  partition_keys {
     name = "year"
     type = "string"
   }
-  Partition_keys {
+  partition_keys {
     name = "month"
     type = "string"
   }
-  Partition_keys {
+  partition_keys {
     name = "day"
     type = "string"
   }
-  Partition_keys {
+  partition_keys {
     name = "hour"
     type = "string"
   }
