@@ -17,7 +17,7 @@ resource "aws_glue_catalog_table" "gold" {
 
   # 파라미터 지정
   parameters = {
-    "classfication"             = "parquet"
+    "classification"             = "parquet"
     "EXTERNAL"                  = "TRUE"
     "parquet.compression"       = "SNAPPY"
     "projection.enabled"        = "true"
@@ -88,7 +88,7 @@ resource "aws_glue_catalog_table" "gold" {
     }
     columns {
       name = "gold_schema_version"
-      type = "struct<name:string,environment:string,instance_id:string>"
+      type = "string"
     }
   }
 
