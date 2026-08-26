@@ -225,15 +225,15 @@ resource "aws_iam_role_policy" "firehose_gold" {
 
 
 # Gold Firehose
-resource "aws_kinesis_firehose_delivery_stream" "logs" {
+resource "aws_kinesis_firehose_delivery_stream" "gold" {
   # 이름
-  name        = local.firehose_name
+  name        = local.gold_firehose_name
   destination = "extended_s3"
 
   # 입력소스 (키네시스, 역활 설정)
   kinesis_source_configuration {
-    kinesis_stream_arn = aws_kinesis_stream.logs.arn
-    role_arn           = aws_iam_role.firehose.arn
+    kinesis_stream_arn = aws_kinesis_stream.gold.arn
+    role_arn           = aws_iam_role.firehose_gold.arn
   }
 
   # 출력대상
@@ -241,57 +241,63 @@ resource "aws_kinesis_firehose_delivery_stream" "logs" {
     # 버킷
     bucket_arn = aws_s3_bucket.data.arn
     # 역활
-    role_arn = aws_iam_role.firehose.arn
+    role_arn = aws_iam_role.firehose_gold.arn
 
     # 버퍼 관련 용량, 시간 설정
-    buffering_size     = var.firehose_buffer_size     # 1Mib
+    buffering_size     = var.firehose_buffer_size     # 64Mib(최소) ~ 128Mib(최대)
     buffering_interval = var.firehose_buffer_interval # 60초
 
     # 데이터를 모아둔상태(버퍼링)에서 기록 -> 포멧
-    # 데이터 레코드 압축
-    # compression_format = "UNCOMPRESSED" # 1차는 원본 지정, 활성화되지 않음
-    compression_format = "GZIP" # GZIP으로 압축
+    compression_format = "UNCOMPRESSED"
 
     # S3 버킷 및 S3 오류 출력 접두사 시간대
     custom_time_zone = "Asia/Seoul"
-
-    # 아래 처럼 구성 => partition pruning => Athena/opensearch/Glue/spark등 열기반으로 데이터 추출 유용
-    # S3 버킷 접두사
-    # bronze/year=2026/month=08/day=20/hour=11/.. 이렇게 파티션 가능 -> 검색 속도 빨라짐
-    prefix = "bronze/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
+    
+    # S3 버킷 접두사    
+    prefix = "gold/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
 
     # S3 버킷 오류 출력 접두사
-    # 현재는 에러를 단독 구성, 브론즈/실버/골드등 계층 구분 하지 x => 필요시 구성 가능
-    # 경로상에 에러애 대한 타입 지정 -> 유형별로 에러가 모이게 작성
-    # [실버 수정]
-    error_output_prefix = "errors/bronze/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
+    error_output_prefix = "errors/gold/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
+
+    # parquet 구성
+    data_format_conversion_configuration {
+      # 구성 정보 사용
+      enabled = true
+      input_format_configuration {
+        # ser_de (serializer/deserializer)
+        deserializer {
+          open_x_json_ser_de {
+            case_insensitive                         = false
+            convert_dots_in_json_keys_to_underscores = false
+          }
+        }
+      }
+      schema_configuration {
+        database_name = aws_glue_catalog_database.gold.name
+        table_name = aws_glue_catalog_table.gold.name
+        role_arn = aws_iam_role.firehose_gold.arn
+        region = var.aws_region
+        version_id = "LATEST"
+      }
+      output_format_configuration {
+        serializer {
+          parquet_ser_de {
+            compression = "SNAPPY"
+            enable_dictionary_compression = true
+          }
+        }
+      }
+    }
+
   }
 
   # 의존성
   depends_on = [
     # 해당 정책 입력/출력 엑세스 권한 생성된 후에 firehose 생성되도록 설정
-    aws_iam_role_policy.firehose
+    aws_iam_role_policy.firehose_gold
+    # 글루서비스에 테이블 구성
   ]
+  tags = {
+    DataLayer = "gold"
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-# 편의상 실시간성을 고려하여 구성
-# silver -> lambda -> gold kinesis -> firehose 
-#        -> Glue Schema -> Parquet(SNAPPY) -> s3 gold/
-
-# 파이썬 파일 -> ZIP 패키징 관련
-# lambda python 소스코드를 AWS lambda에 배포할 ZIP 파일에 포함하여 자동 생성
-# data "archive_file" "gold_lambda" {
-#     type        = "zip"
-#     source_file = "${path.module}/../lambda/lambda_function.py"
-#     output_path = "${path.module}/../lambda/gold-lambda.zip"
-# }
