@@ -250,4 +250,21 @@ L lambda
 ```
 
 # 인프라 구성
-- 
+- gold-lambda.tf
+
+# Athena 쿼리 수행 (silver 레벨)
+```
+# 전체 테이블 조회 
+show tables;
+
+# 테이블 스키마 확인
+describe silver_logs_tbl;
+
+# 특정 시간대 전체 건수 (파티션 활용)
+select count(*) as cnt
+from silver_logs_tbl
+where year='2026' and month='08' and day='25' and hour='14'
+;
+
+
+```

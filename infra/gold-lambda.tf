@@ -15,14 +15,14 @@ variable "gold_kinesis_retention_hour" {
 
 # locals
 locals {
-    # Gold Kinesis 리소스 이름
-    gold_kinesis_stream_name = "${var.project_name}-gold-kinesis"
-    # Gold Firehose 리소스 이름
-    gold_firehose_name  = "${var.project_name}-gold-firehose"
-    # Silver 데이터 -> Gold용을 구성(집계등) 처리하는 lambda 함수명
-    gold_lambda_name    = "${var.project_name}-silver-to-gold"
-    # 람다 함수 배포용 zip 경로 (테라폼 업로드)
-    gold_lambda_zip     = "${path.module}/../lambda/gold/gold-lambda.zip"
+  # Gold Kinesis 리소스 이름
+  gold_kinesis_stream_name = "${var.project_name}-gold-kinesis"
+  # Gold Firehose 리소스 이름
+  gold_firehose_name = "${var.project_name}-gold-firehose"
+  # Silver 데이터 -> Gold용을 구성(집계등) 처리하는 lambda 함수명
+  gold_lambda_name = "${var.project_name}-silver-to-gold"
+  # 람다 함수 배포용 zip 경로 (테라폼 업로드)
+  gold_lambda_zip = "${path.module}/../lambda/gold/gold-lambda.zip"
 }
 
 # kinesis
@@ -37,7 +37,7 @@ resource "aws_kinesis_stream" "gold" {
 
   tags = {
     DataLayer = "gold"
-    Purpose = "lambda-output"
+    Purpose   = "lambda-output"
   }
 }
 
@@ -133,7 +133,7 @@ resource "aws_lambda_function" "silver_to_gold" {
     }
   }
   # 의존성
-  depends_on = [ aws_iam_role_policy.lambda ]
+  depends_on = [aws_iam_role_policy.lambda]
   # 태그
   tags = {
     DataLayer = "gold"
@@ -156,9 +156,9 @@ resource "aws_lambda_event_source_mapping" "silver_to_gold" {
   # 테라폼 구성 이후 활성화
   enabled = true
   # 실패한 레코드에 대해, 성공 레코드도 섞여 있을 경우, 다시 처리 할것인가? -> 다시 처리 않함
-  function_response_types = [ "ReportBatchItemFailure" ]
+  function_response_types = ["ReportBatchItemFailure"]
   # 의존성
-  depends_on = [ aws_iam_role_policy.lambda ]
+  depends_on = [aws_iam_role_policy.lambda]
 }
 
 # Firehose IAM Role
@@ -174,7 +174,7 @@ data "aws_iam_policy_document" "firehose_gold_assume" {
   }
 }
 resource "aws_iam_role" "firehose_gold" {
-  name = "${var.project_name}-gold-firehose-role"
+  name               = "${var.project_name}-gold-firehose-role"
   assume_role_policy = data.aws_iam_policy_document.firehose_gold_assume.json
 }
 data "aws_iam_policy_document" "firehose_gold" {
@@ -252,7 +252,7 @@ resource "aws_kinesis_firehose_delivery_stream" "gold" {
 
     # S3 버킷 및 S3 오류 출력 접두사 시간대
     custom_time_zone = "Asia/Seoul"
-    
+
     # S3 버킷 접두사    
     prefix = "gold/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
 
@@ -274,15 +274,15 @@ resource "aws_kinesis_firehose_delivery_stream" "gold" {
       }
       schema_configuration {
         database_name = aws_glue_catalog_database.gold.name
-        table_name = aws_glue_catalog_table.gold.name
-        role_arn = aws_iam_role.firehose_gold.arn
-        region = var.aws_region
-        version_id = "LATEST"
+        table_name    = aws_glue_catalog_table.gold.name
+        role_arn      = aws_iam_role.firehose_gold.arn
+        region        = var.aws_region
+        version_id    = "LATEST"
       }
       output_format_configuration {
         serializer {
           parquet_ser_de {
-            compression = "SNAPPY"
+            compression                   = "SNAPPY"
             enable_dictionary_compression = true
           }
         }
