@@ -380,3 +380,9 @@ ORDER BY avg_latency_ms DESC
 ```
 
 # 람다 코드 작성
+
+# 람다 코드 빌드
+```
+scripts/build-gold-lambda.bat
+sh ./scripts/build-gold-lambda.sh
+```
