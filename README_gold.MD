@@ -398,3 +398,6 @@ terraform -chdir=infra apply
 - flink 실행
 - 실행확인되면 로그 발생 (1분)
 - 1분 이후 s3/버킷/골드 하위에 데이터 확인
+  ```
+  scripts\run-generator.bat ecommerce 300 10 0.03 1 ap-northeast-2 1
+  ```
